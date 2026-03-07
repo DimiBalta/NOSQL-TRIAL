@@ -18,7 +18,7 @@ print(df.head())
 # x = 'Age', 'Sibsp', 'Parch'
 
 y = df['Survived']
-X = df[['Age','SibSp','Parch']]
+X = df[['Age','SibSp','Parch','Pclass']]
 
 X = X.fillna(X.mean()) # if we remove the missing values, we lose too much data
 
