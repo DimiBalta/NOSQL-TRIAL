@@ -4,43 +4,88 @@
 // The current database to use.
 use("analytics");
 
-// Find a document in a collection.
-db.getCollection("clickstream").insertMany([
-{
-"user_id": 101,
-"page": "home",
-"device": "mobile",
-"time_spent": 5,
-"country": "UK"
-},
-{
-"user_id": 102,
-"page": "product",
-"device": "desktop",
-"time_spent": 12,
-"country": "UK"
-},
-{
-"user_id": 103,
-"page": "checkout",
-"device": "mobile",
-"time_spent": 8,
-"country": "France"
-},
-{
-"user_id": 104,
-"page": "home",
-"device": "tablet",
-"time_spent": 4,
-"country": "Germany"
-},
-{
-"user_id": 105,
-"page": "product",
-"device": "mobile",
-"time_spent": 15,
-"country": "UK"
-}
+// Average time spent per page.
+db.getCollection("clickstream").aggregate({
+    "$group":{
+        "_id": "$page",
+        "avg_time": {"$avg": "$time_spent"}
+    }
 
+});
+
+// Average time spent per country.
+db.getCollection("clickstream").aggregate({
+    "$group":{
+        "_id": "$country",
+        "avg_time": {"$avg": "$time_spent"}
+    }
+
+});
+
+// Total time per device
+db.getCollection("clickstream").aggregate({
+    "$group":{
+        "_id": "$device",
+        "sum_time": {"$sum": "$time_spent"}
+    }
+
+});
+
+// Total time per device and country
+db.getCollection("clickstream").aggregate({
+    "$group":{
+        "_id": "$device",
+        "_id": "$country",
+        "sum_time": {"$sum": "$time_spent"}
+    }
+
+});
+
+// only user
+db.getCollection("clickstream").find(
+{},
+    {
+        user_id: 1,
+        page: 1,
+        _id: 0
+    });
+
+// sort by time spent (max -> min) -1 DESCending
+db.getCollection("clickstream").find().sort({
+        time_spent: - 1
+    });
+
+
+//show the lowest engagement session per page 
+
+db.getCollection("clickstream").aggregate([
+{
+    $group: {
+       _id: "$page",
+        lowest_time: {$min:"$time_spent"}
+    }
+}
 ]);
+
+//analytics pipeline example
+// filter mobile users, group by page and calculate metrics and sort results
+
+db.getCollection("clickstream").aggregate([
+{
+    $match: {device: "mobile"}
+    },
+{
+    $group: {
+        _id: "$page",
+        avg_time: {$avg: "$time_spent"}
+            }
+},
+{
+    $sort: {
+      avg_time: -1
+    }
+}
+]);
+
+
 
