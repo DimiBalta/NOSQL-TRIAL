@@ -43,3 +43,4 @@ db.getCollection("clickstream").insertMany([
 }
 
 ]);
+
